@@ -306,7 +306,7 @@ namespace Rito.ObjectPooling
                     _cloneDict.Remove(clone);      // Clone - Pool 딕셔너리에서 제거
                     Destroy(clone);                // 게임오브젝트 파괴
 
-                    Test_ChangeContainerName(key);
+                    Test_ChangeContainerName(key); // 컨테이너 이름 변경
                 }
 
                 yield return wfs;
@@ -461,24 +461,19 @@ namespace Rito.ObjectPooling
         /// <summary> Despawn 실제 처리 </summary>
         private void DespawnInternal(CloneScheduleInfo data)
         {
-            GameObject go = data.clone;
-            Stack<GameObject> pool = data.pool;
-
             // 예약되어 있던 경우, 해제
             data.CancelSchedule();
 
-            if (go == null) return;
-
             // 풀에 집어넣기
-            go.SetActive(false);
-            pool.Push(go);
+            data.clone.SetActive(false);
+            data.pool.Push(data.clone);
 
             TestModeOnly(() =>
             {
-                KeyType key = _t_poolKeyDict[pool];
+                KeyType key = _t_poolKeyDict[data.pool];
 
                 // 컨테이너 자식으로 넣기
-                go.transform.SetParent(_t_ContainerDict[key].transform);
+                data.clone.transform.SetParent(_t_ContainerDict[key].transform);
 
                 // 컨테이너 이름 변경
                 Test_ChangeContainerName(key);
@@ -512,10 +507,10 @@ namespace Rito.ObjectPooling
                 return;
             }
 
+            DespawnInternal(cloneData);
+
             DebugLog(_debugDespawn && cloneData.DespawnScheduled, $"Despawn 예약 해제 및 즉시 실행 : {go.name}({go.GetInstanceID()})");
             DebugLog(_debugDespawn && !cloneData.DespawnScheduled, $"Despawn : {go.name}({go.GetInstanceID()})");
-
-            DespawnInternal(cloneData);
         }
 
         /// <summary> n초 후 풀에 집어넣기 </summary>
@@ -571,7 +566,7 @@ namespace Rito.ObjectPooling
                 await Task.Delay((int)(seconds * 1000));
                 
                 // 예약 정보가 유효한 경우, 큐에 넣기
-                if (data.IsScheduleValid(prevVersion))
+                if (go != null && data.IsScheduleValid(prevVersion))
                 {
                     _despawnScheduleQueue.Enqueue(data);
                 }
