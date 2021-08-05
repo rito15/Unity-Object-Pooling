@@ -381,10 +381,17 @@ namespace Rito.ObjectPooling
             });
         }
 
-        /// <summary> 새로운 풀 생성 </summary>
+        /// <summary> 키를 등록하고 새로운 풀 생성 </summary>
         public void Register(KeyType key, GameObject prefab, 
             int initalCount = PoolObjectData.INITIAL_COUNT, int maxCount = PoolObjectData.MAX_COUNT)
         {
+            // 중복 키는 등록 불가능
+            if (_poolDict.ContainsKey(key))
+            {
+                DebugLog(_debugRegister, $"{key}가 이미 Pool Queue Dict에 존재합니다.");
+                return;
+            }
+
             if (initalCount < 0) initalCount = 0;
             if (maxCount < 10) maxCount = 10;
 

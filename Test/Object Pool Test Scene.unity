@@ -283,7 +283,7 @@ MonoBehaviour:
   _debugRegister: 1
   _debugSpawn: 1
   _debugDespawn: 1
-  _testModeOn: 0
+  _testModeOn: 1
   _poolCleaningInterval: 0.1
   _nonePoolObjectDespawnPolicy: 2
   _poolObjectDataList:
